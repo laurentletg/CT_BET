@@ -1,0 +1,26 @@
+# Model Configuration
+
+
+# name added to the file to identify the model
+TAG: '3D-finetune_lr1e-6_100_epoch'
+
+# Input image dimension configuration
+# This needs to match the right weights file below
+IMAGE_INPUT: '3D'  # Options: 2D or 3D
+
+# Training mode True: from scratch, False: fine-tune
+TRAIN_FROM_SCRATCH: False  # Set to False for fine-tuning
+
+# Model weights paths
+WEIGHTS:
+  # Original weights files
+  2D: 'unet_CT_SS_20171114_170726.h5'
+  3D: 'unet_CT_SS_3D_201843_163521.h5'
+
+
+
+## Hyperparameters
+LR: 0.000001  # Learning rate
+# Number of epochs
+EPOCHS: 100
+BS: 1  # Batch size

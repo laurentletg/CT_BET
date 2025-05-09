@@ -28,7 +28,8 @@ from keras.optimizers import Adam, SGD, RMSprop, Adadelta
 import SimpleITK as sitk
 from  scipy.ndimage.interpolation import zoom as interp3D
 from load3Ddata import arrangeData as arrange3Ddata
-from load3Ddata import arrange3DtestImage,arrange3DtestLabel 
+from load3Ddata import arrange3DtestImage,arrange3DtestLabel
+from tqdm import tqdm
 
 class Unet_CT_SS(object):
 
@@ -426,13 +427,17 @@ class Unet_CT_SS(object):
             model.load_weights(pretrained_weights)
         
         print('-'*30)
-        print('Loading training data - training from scratch...')
+        print('Loading training data')
         print('-'*30)
         
         
         train_images_path, train_labels_path = self.arrangeDataPath(self.root_folder, self.image_folder,self.mask_folder)
         hist={};hist['acc']=[];hist['loss']=[]
-        for epochs in range(self.numEpochs):
+
+        print('-'*30)
+        print('Training model...')
+        print('-'*30)
+        for epochs in tqdm(range(self.numEpochs)):
             print('epochs: ', epochs)
             acc=0;loss=0
             for number, each in enumerate(os.listdir(train_images_path)):
@@ -487,7 +492,7 @@ class Unet_CT_SS(object):
         hist={};hist['acc']=[];hist['loss']=[]
             
         
-        for epochs in range(self.numEpochs):
+        for epochs in tqdm(range(self.numEpochs)):
             print('epochs: ', epochs)
             acc=0;loss=0
             for number, each in enumerate(os.listdir(train_images_path)):

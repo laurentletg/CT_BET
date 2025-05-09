@@ -1,21 +1,52 @@
 # ATTENTION! 
-### Make sure to create an environnement with the following requirements to save some time and trouble shooting: 
-tensorflow                1.15.0;
-keras                     2.3.1;
-h5py                      2.10.0;
+### Current version is under main branch instead of original under the master branch
 
-the following packages can probably be updated up to date, but to be sure, those are compatible versions
 
-simpleitk                 2.3.0;
-scikit-learn              1.0.2;
-scipy                     1.7.3;
-nibabel                   4.0.2;
-numpy                     1.21.6;
+## Set up
+### Part 1: Getting the right environment 
+1. Use the environment .yml file to create a conda environment with the required packages.
+```
+conda env create -f environment.yml
+```
+2. Check that you have the appropriate cuda and cudnn version installed. 
+```
+python -c "import tensorflow as tf; print(tf.test.is_gpu_available())"
+```
 
-### quick start
-1. Downloads the weight files from google drive link in the weight_file in the weights folder and place it in the weights_folder
-   (IF YOU WANT TO USE A PRETRAINED MODEL, DROP YOUR OWN WEIGHT FILE IN THE FOLDER)
-2. Drop your images under image_data
+3.Activate the environment
+```
+conda activate ct_bet_v2
+```
+You can double check the environement packages with 
+```
+conda list
+```
+
+### Make sure to create an environnement with the following requirements to save some time and trouble shooting:
+- CUDA 10.0 et CUDNN 7.6!!!!!
+```
+conda install conda-forge::cudatoolkit =10.0
+conda install conda-forge::cudnn =7.6
+```
+- tensorflow                1.15.0;
+- keras                     2.3.1;
+- h5py                      2.10.0;
+- the following packages can probably be updated up to date, but to be sure, those are compatible versions
+- simpleitk                 2.3.0;
+- scikit-learn              1.0.2;
+- scipy                     1.7.3;
+- nibabel                   4.0.2;
+- numpy                     1.21.6;
+
+## Part 2: Getting the weights 
+1. Downloads the weight files from google drive link in the [weight_file](weights_folder/weight_file) and place it in the weights_folder. 
+
+> [weight_file.txt](../../../../Downloads/weight_file.txt)
+
+## Part 3: Running the model (Train - Finetune - Predict)
+
+1. Drop your images under `image_data` folder
+2. Set up the `config.yaml` file. 
 3. set predict flag to be true in unet_CT_SS.py file and "testLabelFlag" to be False
 4. In the main function at the bottom of unet_CT_SS.py, validate that weightFile has the correct path ('unet_CT_SS_2017... .h5' if you're the 2d model (Predicti), and 'unet_CT_SS_3D_...' if you're using Predict3D, or you're own trained weight)
 

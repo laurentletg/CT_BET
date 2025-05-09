@@ -9,17 +9,11 @@ Created on Thu Nov  9 13:18:46 2017
 import os
 import sys
 import time
+import yaml
+
 arg0 = sys.argv[0]
 print(arg0)
 
-# LLG added 
-TAG = '3D_finetune_final_1' # will be added to folder name (see oLabel below line 34)
-IMAGE_INPUT = '3D' # 2D or 3D
-TRAIN_FROM_SCRATCH = False # set to True if you want to train from scratch
-WEIGHTS_2D_ORIGINAL = 'unet_CT_SS_20171114_170726.h5'
-WEIGHTS_3D_ORIGINAL = 'unet_CT_SS_3D_201843_163521.h5'
-WEIGHTS_2D_UPDATED = None
-WEIGHTS_3D_UPDATED = None
 
 
 code_dir=os.getcwd()
@@ -32,12 +26,22 @@ sys.path.append(code_dir)
 os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 from auggen import AugmentationGenerator as dataGenerator
-from model_CT_SS_LLG import Unet_CT_SS as genUnet
+from model_CT_SS import Unet_CT_SS as genUnet
 
+
+# LLG added
+def get_yaml():
+    yaml_file = os.path.join(code_dir, 'config.yaml')
+    with open(yaml_file, 'r') as file:
+        config = yaml.safe_load(file)
+    return config
+
+
+config = get_yaml()
 
 #===============output label & mode flags======================#
 #*************set these flags before running*******************#
-oLabel = arg0[arg0.rfind('/')+1:-3]+'_'+timeStamp + '_' + TAG
+oLabel = arg0[arg0.rfind('/')+1:-3]+'_'+timeStamp + '_' + config['TAG']
 resultsFolder='results_folder'
 pred_folder= 'predictions'
 train=True
@@ -74,7 +78,7 @@ else:
     afold=''
 #===================set optimizer=====================#
 # lr=1e-5
-lr = 1e-6 # for fine-tuning
+lr = config['LR']
 decay=1e-6
 optimizer = 'adam'
 #optimizer = SGD(lr=1e-4, momentum=0.9, decay=1e-9, nesterov=True)
@@ -95,8 +99,8 @@ unetSS = genUnet(root_folder=code_dir,
     oLabel=oLabel,
     checkWeightFileName=oLabel+'.h5',
     afold=afold, 
-    numEpochs=100,
-    bs = 1, 
+    numEpochs=config['EPOCHS'],
+    bs = config['BS'],
     nb_classes=2,
     sC=2, #saved class
     img_row=512,img_col=512,channel=1,
@@ -119,34 +123,37 @@ logFile.write('\n'+'-'*30+'\n')
 logFile.close()
 
 
+
 if __name__ == '__main__':
+    config = get_yaml()
+
     unetSS.pred_folder=pred_folder
     unetSS.save_folder = os.path.join(code_dir,resultsFolder,oLabel,pred_folder)
     unetSS.weight_folder=os.path.join(code_dir,'weights_folder')
     
     if predict:
-        if IMAGE_INPUT == '2D':
+        if config['IMAGE_INPUT'] == '2D':
             # 2D pre-trained by authors
-            weightFile=(os.path.join(unetSS.weight_folder, WEIGHTS_2D_ORIGINAL))
+            weightFile=(os.path.join(unetSS.weight_folder, config['WEIGHTS']['2D']))
             unetSS.Predict(weightFile)
-        if IMAGE_INPUT == '3D':
+        if config['IMAGE_INPUT'] == '3D':
             # 3D pre-trained by authors
-            weightFile=(os.path.join(unetSS.weight_folder, WEIGHTS_3D_ORIGINAL))
+            weightFile=(os.path.join(unetSS.weight_folder, config['WEIGHTS']['3D']))
             unetSS.Predict3D(weightFile)
         else:
-            print('please set IMAGE_INPUT')
+            print('please set IMAGE_INPUT]')
             sys.exit()
 
     elif train:
-        if IMAGE_INPUT == '2D':
+        if config['IMAGE_INPUT'] == '2D':
             # 2D pre-trained by authors
-            weightFile=(os.path.join(unetSS.weight_folder, WEIGHTS_2D_ORIGINAL))
-            unetSS.train(train_from_scratch=TRAIN_FROM_SCRATCH, pretrained_weights = weightFile)
+            weightFile=(os.path.join(unetSS.weight_folder, config['WEIGHTS']['2D']))
+            unetSS.train(train_from_scratch =config['TRAIN_FROM_SCRATCH'], pretrained_weights = weightFile)
         
-        if IMAGE_INPUT == '3D':
+        if config['IMAGE_INPUT'] == '3D':
             # 3D pre-trained by authors
-            weightFile=(os.path.join(unetSS.weight_folder, WEIGHTS_3D_ORIGINAL))
-            unetSS.train3D(train_from_scratch=TRAIN_FROM_SCRATCH, pretrained_weights = weightFile)
+            weightFile=(os.path.join(unetSS.weight_folder, config['WEIGHTS']['3D']))
+            unetSS.train3D(train_from_scratch=config['TRAIN_FROM_SCRATCH'], pretrained_weights = weightFile)
 
     else:
         print('please set a task flag: train or predict')
